@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.env
+venv/
+.venv/
+token.pickle
+credentials.json
+
+# Poetry
+dist/
+*.egg-info/
+poetry.lock
