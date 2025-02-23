@@ -10,14 +10,31 @@ class LLMService:
         
     def parse_calendar_query(self, query: str) -> Dict[str, Any]:
         """
-        Uses GPT-3.5-turbo to parse natural language into structured calendar data.
+        Uses GPT-3.5-turbo to parse natural language into structured data.
         """
         system_prompt = """
         You are a calendar assistant that helps parse natural language queries into structured data.
         You should extract event details and return them in a JSON format.
-        Only respond with valid JSON, no other text.
         
-        The JSON should have this structure:
+        Handle time references flexibly:
+        - Specific times ("at 3pm"): Use as provided
+        - Time ranges ("morning"): Use 9am
+        - Part of day ("evening"): Use 6pm
+        - Just date ("this weekend"): Use 10am
+        - No time specified: Use next available time slot starting at the next hour
+        
+        Default duration if not specified:
+        - Shopping/errands: 2 hours
+        - Meetings: 1 hour
+        - Appointments: 1 hour
+        - General tasks: 1 hour
+        
+        Only throw errors if the query:
+        - Is empty: "Query cannot be empty"
+        - Has no clear purpose: "Query must specify an event purpose"
+        - Is nonsensical: "Query is not a valid calendar request"
+        
+        For valid queries, return JSON with this structure:
         {
             "event": {
                 "summary": "string",
@@ -32,19 +49,23 @@ class LLMService:
                 }
             }
         }
+
+        For invalid queries, return JSON with this structure:
+        {
+            "error": "error message string"
+        }
         """
 
         user_prompt = f"""
         Parse this calendar query: "{query}"
         Current time: {datetime.now().isoformat()}
         
-        Extract:
-        1. Event title/summary
-        2. Start time and date
-        3. Duration or end time
-        4. Any other relevant details for description
+        A valid query needs:
+        1. A clear purpose or title
+        2. A specific time or date reference
+        3. An explicit or implied duration
         
-        Return only the JSON.
+        Return the JSON response.
         """
 
         try:
@@ -54,19 +75,25 @@ class LLMService:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0,  # Make it deterministic
-                response_format={ "type": "json_object" }  # Ensure JSON response
+                temperature=0,
+                response_format={ "type": "json_object" }
             )
             
             # Parse the response
             result = json.loads(response.choices[0].message.content)
             
+            # Check if the response contains an error
+            if 'error' in result:
+                raise ValueError(result['error'])
+                
             # Validate the response structure
             if not self._validate_response(result):
                 raise ValueError("Invalid response structure from LLM")
                 
             return result
 
+        except json.JSONDecodeError:
+            raise ValueError("Failed to parse LLM response")
         except Exception as e:
             raise ValueError(f"Failed to parse query with LLM: {str(e)}")
     

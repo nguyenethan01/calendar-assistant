@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.class
 .env
+.env.test
 venv/
 .venv/
 token.pickle
@@ -11,4 +12,15 @@ credentials.json
 # Poetry
 dist/
 *.egg-info/
-poetry.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

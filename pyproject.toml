@@ -14,7 +14,9 @@ dependencies = [
     "google-auth-httplib2 (>=0.2.0,<0.3.0)",
     "google-api-python-client (>=2.161.0,<3.0.0)",
     "requests (>=2.32.3,<3.0.0)",
-    "pytz (>=2025.1,<2026.0)"
+    "pytz (>=2025.1,<2026.0)",
+    "openai (>=1.64.0,<2.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
 ]
 
 
@@ -24,3 +26,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-dotenv = "^0.5.2"
+
