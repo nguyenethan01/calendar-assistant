@@ -6,11 +6,15 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import os.path
 import pickle
+import pytz  # Add this import
 
 app = Flask(__name__)
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+# Get your timezone - for example 'America/Los_Angeles' or 'America/New_York'
+TIMEZONE = 'America/Los_Angeles'  # Adjust this to your timezone
 
 def get_calendar_service():
     """Get an authorized Calendar API service instance."""
@@ -54,8 +58,9 @@ def schedule_event():
         
         service = get_calendar_service()
         
-        # Simple example - creates event for current time + 1 hour
-        start_time = datetime.now()
+        # Get current time in your timezone
+        local_tz = pytz.timezone(TIMEZONE)
+        start_time = datetime.now(local_tz)
         end_time = start_time + timedelta(hours=1)
         
         event = {
@@ -63,11 +68,11 @@ def schedule_event():
             'description': 'Auto-scheduled cleaning task',
             'start': {
                 'dateTime': start_time.isoformat(),
-                'timeZone': 'Your/Timezone',  # e.g., 'America/New_York'
+                'timeZone': TIMEZONE,
             },
             'end': {
                 'dateTime': end_time.isoformat(),
-                'timeZone': 'Your/Timezone',  # e.g., 'America/New_York'
+                'timeZone': TIMEZONE,
             },
         }
 

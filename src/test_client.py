@@ -9,10 +9,17 @@ def test_schedule_event():
         "query": "schedule a 1 hour event today for cleaning room that has a deadline of tonight"
     }
     
+    headers = {
+        'Content-Type': 'application/json'  # Add this header
+    }
+
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, headers=headers)
         print("Status Code:", response.status_code)
-        print("Response:", response.json())
+        if response.status_code == 200:
+            print("Response:", response.json())
+        else:
+            print("Error:", response.text)
     except requests.exceptions.ConnectionError:
         print("Error: Could not connect to server. Is it running?")
     except Exception as e:
